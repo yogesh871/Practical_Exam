@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import { getBlogsAsync, deleteBlogAsync } from '../services/Actions/blogAction';
 import './Home.css';
+import Showcase from './ShowCase/ShowCase';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -84,6 +85,7 @@ const Home = () => {
   ];
 
   return (
+    <>
     <div className="blog-explorer">
       <header className="explorer-header">
         <h1>Discover Stories</h1>
@@ -94,14 +96,14 @@ const Home = () => {
             <button
               className={`filter-option ${!selectedCategory ? 'active' : ''}`}
               onClick={() => setSelectedCategory('')}
-            >
+              >
               All
             </button>
             {categoryOptions.map((cat) => (
               <button
-                key={cat.value}
-                className={`filter-option ${selectedCategory === cat.value ? 'active' : ''}`}
-                onClick={() => {
+              key={cat.value}
+              className={`filter-option ${selectedCategory === cat.value ? 'active' : ''}`}
+              onClick={() => {
                   setSelectedCategory(cat.value);
                   navigate(`/?page=1&search=${searchTerm}`);
                 }}
@@ -135,7 +137,7 @@ const Home = () => {
           <div className="blog-grid">
             {currentBlogs.map((blog) => {
               const color = categoryOptions.find(cat => cat.value === blog.category)?.color || '#64748b';
-
+              
               return (
                 <article key={blog.id} className="blog-card">
                   <div className="card-image-container">
@@ -144,7 +146,7 @@ const Home = () => {
                       alt={blog.title}
                       className="blog-image"
                       onClick={() => navigate(`/Blog/${blog.id}`)}
-                    />
+                      />
                     <button
                       className={`action-btn save-btn ${savedBlogs.includes(blog.id) ? 'saved' : ''}`}
                       onClick={() => toggleSaveBlog(blog.id)}
@@ -180,14 +182,14 @@ const Home = () => {
                             className="action-btn edit-btn"
                             onClick={() => navigate(`/editBlog/${blog.id}`)}
                             title="Edit Blog"
-                          >
+                            >
                             <FaEdit />
                           </button>
                           <button
                             className="action-btn delete-btn"
                             onClick={() => handleDelete(blog.id, blog.userId)}
                             title="Delete Blog"
-                          >
+                            >
                             <FaTrash />
                           </button>
                         </>
@@ -250,6 +252,9 @@ const Home = () => {
         </>
       )}
     </div>
+
+    <Showcase/>
+      </>
   );
 };
 

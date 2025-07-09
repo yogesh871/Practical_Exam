@@ -11,6 +11,7 @@ import Sign_Up from './Components/FormPage/Sign_Up';
 import { checkAuthStateAsync } from './services/Actions/authAction'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MyBlogs from './Components/profile';
+import Footer from './Components/Footer/Footer';
 
 function App() {
   const dispatch = useDispatch();
@@ -31,6 +32,7 @@ function App() {
         <Route path="/Sign_Up" element={<Sign_Up />} />
         <Route path="/MyBlogs" element={<MyBlogs />} />
       </Routes>
+      <Footer/>
     </>
   );
 }
