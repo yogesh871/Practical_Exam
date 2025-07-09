@@ -1,59 +1,63 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import "./Form.css";
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaArrowRight, FaGoogle } from "react-icons/fa";
+import { FaCircleUser } from "react-icons/fa6";
 import { useDispatch, useSelector } from 'react-redux';
-import { googleSignInAsync, signINAsync } from '../../services/Actions/authAction';
+import { signUpAsync } from '../../services/Actions/authAction';
 import { ToastContainer, toast } from 'react-toastify';
 
-const Sign_In = () => {
+const Sign_Up = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, errorMSG } = useSelector(state => state.authReducer);
+  const { isCreated, errorMsg } = useSelector(state => state.authReducer);
 
-  const [formData, setFormData] = useState({ 
-    email: '', 
-    password: '' 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    cpassword: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const prevUser = useRef(null);
 
   useEffect(() => {
-    if (user && !prevUser.current) {
-      toast.success("User logged in successfully!");
+    if (isCreated) {
+      toast.success("Account created and logged in!");
       setTimeout(() => {
         navigate('/');
       }, 1500);
     }
-    prevUser.current = user;
-  }, [user, navigate]);
+  }, [isCreated, navigate]);
 
   useEffect(() => {
-    if (errorMSG) {
-      toast.error(errorMSG);
+    if (errorMsg) {
+      toast.error(errorMsg);
+      setIsSubmitting(false);
     }
-  }, [errorMSG]);
+  }, [errorMsg]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.password !== formData.cpassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setIsSubmitting(true);
-    dispatch(signINAsync(formData))
-      .finally(() => setIsSubmitting(false));
+    await dispatch(signUpAsync({ email: formData.email, password: formData.password }));
   };
 
-  const handleGoogleSignIn = () => {
-    setIsSubmitting(true);
-    dispatch(googleSignInAsync())
-      .finally(() => setIsSubmitting(false));
-  };
+  const isFormValid =
+    formData.email.trim() &&
+    formData.password.trim() &&
+    formData.cpassword.trim() &&
+    formData.password === formData.cpassword;
 
   return (
     <>
@@ -62,85 +66,65 @@ const Sign_In = () => {
         <div className="form-card" style={{ maxWidth: "700px" }}>
           <div className='d-flex justify-content-between align-items-end'>
             <div className="form-title">
-              <div className="title-icon">
-                <FaUser size={16} />
-              </div>
-              <h2 className="mb-1">Welcome Back</h2> 
+              <div className="title-icon"><FaCircleUser /></div>
+              <h2 className="mb-1">Create Account</h2>
             </div>
-            <p className="text-muted small">Sign in to continue to your account</p>
+            <p className="text-muted small">Join us today! Fill in your details</p>
           </div>
 
           <Form className="product-form mt-3" onSubmit={handleSubmit}>
-            <Form.Group className="form-group mb-3" controlId="formEmail">
-              <Form.Label className="form-label">Email address</Form.Label>
+            <Form.Group className="form-group mb-3">
+              <Form.Label>Email address</Form.Label>
               <Form.Control
-                className="form-input"
                 type="email"
                 placeholder="Enter your email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                disabled={isSubmitting}
                 required
+                disabled={isSubmitting}
               />
             </Form.Group>
 
-            <Form.Group className="form-group mb-3" controlId="formPassword">
-              <Form.Label className="form-label">Password</Form.Label>
+            <Form.Group className="form-group mb-3">
+              <Form.Label>Password</Form.Label>
               <Form.Control
-                className="form-input"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Create password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                disabled={isSubmitting}
                 required
+                disabled={isSubmitting}
               />
-              <div className="d-flex justify-content-end mt-2">
-                <Link 
-                  to="/forgot-password" 
-                  className="small text-decoration-none" 
-                  style={{ color: 'var(--primary)' }}
-                >
-                  Forgot password?
-                </Link>
-              </div>
             </Form.Group>
 
-            <Button 
-              className="submit-btn w-100 py-2 mb-3" 
-              variant="primary" 
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Signing In...' : 'Sign In'}
-              <span className="btn-icon ms-2"><FaArrowRight /></span>
-            </Button>
-
-            <div className="divider mb-3">
-              <span className="text-muted small">OR</span>
-            </div>
+            <Form.Group className="form-group mb-3">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Confirm password"
+                name="cpassword"
+                value={formData.cpassword}
+                onChange={handleChange}
+                required
+                disabled={isSubmitting}
+              />
+            </Form.Group>
 
             <Button
-              onClick={handleGoogleSignIn}
-              className="google-btn w-100 py-2"
-              variant="outline-danger"
-              type="button"
-              disabled={isSubmitting}
+              className="submit-btn w-100 py-2"
+              variant="primary"
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
             >
-              <FaGoogle className="me-2" />
-              Sign in with Google
+              {isSubmitting ? 'Creating Account...' : 'Create Account →'}
             </Button>
 
             <div className="text-center mt-4">
-              <span className="text-muted small">Don't have an account? </span>
-              <Link 
-                to="/Sign_Up" 
-                className="small fw-bold text-decoration-none" 
-                style={{ color: 'var(--primary)' }}
-              >
-                Sign up
+              <span className="text-muted small">Already have an account? </span>
+              <Link to="/Sign_In" className="small fw-bold text-decoration-none">
+                Sign in
               </Link>
             </div>
           </Form>
@@ -150,4 +134,4 @@ const Sign_In = () => {
   );
 };
 
-export default Sign_In;
+export default Sign_Up;

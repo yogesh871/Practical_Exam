@@ -31,11 +31,10 @@ export const signINAsync = ({ email, password }) => async (dispatch) => {
 export const signUpAsync = ({ email, password }) => async (dispatch) => {
   dispatch(clearError());
   try {
-    const res = await createUserWithEmailAndPassword(auth, email, password);
+    await createUserWithEmailAndPassword(auth, email, password);
     dispatch(signUPSuc());
-    dispatch(signINSuc({ email: res.user.email, uid: res.user.uid }));
   } catch (err) {
-    dispatch(setError(err.message));
+    dispatch(setError(err.message.replace("Firebase: ", "").replace(/\(.*\)/, "").trim()));
   }
 };
 

@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 const Sign_Up = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isCreated, errorMSG } = useSelector(state => state.authReducer);
+  const { isCreated, errorMsg } = useSelector(state => state.authReducer);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -19,9 +19,11 @@ const Sign_Up = () => {
     cpassword: ''
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (isCreated) {
-      toast.success("User created successfully!");
+      toast.success("Account created successfully!");
       setTimeout(() => {
         navigate('/Sign_In');
       }, 1500);
@@ -29,25 +31,34 @@ const Sign_Up = () => {
   }, [isCreated, navigate]);
 
   useEffect(() => {
-    if (errorMSG) {
-      toast.error(errorMSG);
+    if (errorMsg) {
+      toast.error(errorMsg);
+      setIsSubmitting(false);
     }
-  }, [errorMSG]);
+  }, [errorMsg]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password !== formData.cpassword) {
       toast.error("Passwords do not match");
       return;
     }
-    
-    dispatch(signUpAsync(formData));
+
+    setIsSubmitting(true);
+    await dispatch(signUpAsync({ email: formData.email, password: formData.password }));
+    setIsSubmitting(false);
   };
+
+  const isFormValid =
+    formData.email.trim() &&
+    formData.password.trim() &&
+    formData.cpassword.trim() &&
+    formData.password === formData.cpassword;
 
   return (
     <>
@@ -72,6 +83,7 @@ const Sign_Up = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </Form.Group>
 
@@ -84,6 +96,7 @@ const Sign_Up = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </Form.Group>
 
@@ -96,11 +109,17 @@ const Sign_Up = () => {
                 value={formData.cpassword}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </Form.Group>
 
-            <Button className="submit-btn w-100 py-2" variant="primary" type="submit">
-              Create Account →
+            <Button
+              className="submit-btn w-100 py-2"
+              variant="primary"
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+            >
+              {isSubmitting ? 'Creating Account...' : 'Create Account →'}
             </Button>
 
             <div className="text-center mt-4">

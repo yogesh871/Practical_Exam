@@ -10,7 +10,6 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         user: action.payload || null,
-        isCreated: false,
         errorMsg: "",
       };
 
